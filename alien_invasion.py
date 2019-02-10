@@ -1,6 +1,7 @@
 import pygame
 
 from settings import Settings
+from ship import Ship
 
 def run_game():
     #Иницилизация игры и создание объекта окна
@@ -11,6 +12,8 @@ def run_game():
 
     pygame.display.set_caption("Alien Invasion")
 
+    ship = Ship(screen)
+
     while True:
         #Отслеживание событий с клавиатуры и мыши
         for event in pygame.event.get():
@@ -18,6 +21,7 @@ def run_game():
                 return
 
         screen.fill(ai_settings.bg_color)
+        ship.blitme()
         #Отображение последнего прорисованого экрана
         pygame.display.flip()
 
