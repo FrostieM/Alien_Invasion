@@ -16,6 +16,7 @@ class Ship():
         self.rect = self.image.get_rect()
         self.screen_rect = screen.get_rect()
         self.rect.centerx = self.screen_rect.centerx
+        self.center = float(self.rect.centerx)
         self.rect.bottom = self.screen_rect.bottom
         self.moving = 0
 
@@ -24,11 +25,13 @@ class Ship():
         self.screen.blit(self.image, self.rect)
     
     def update(self, ai_settings: Settings):
-        if self.moving == 1:
-            if self.rect.centerx < ai_settings.screen_width:
-                self.rect.centerx += 2
+        self.center += self.moving * ai_settings.ship_speed_factor
         
-        elif self.moving == -1:
-            if self.rect.centerx > 0:
-                self.rect.centerx -= 2
+        if self.center < 0:
+            self.center = 0
         
+        if self.center > ai_settings.screen_width:
+            self.center = ai_settings.screen_width
+
+        self.rect.centerx = self.center
+
