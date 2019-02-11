@@ -3,7 +3,6 @@ from pygame.sprite import Group
 
 from settings import Settings
 from ship import Ship
-
 import game_functions as gf
 
 
@@ -22,7 +21,7 @@ def run_game():
     while True:
         if gf.check_events(ai_settings, screen, ship, bullets):
             return
-
+        
         gf.update_screen(ai_settings, screen, ship, bullets)
 
 

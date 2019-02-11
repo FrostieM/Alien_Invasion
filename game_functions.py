@@ -28,26 +28,40 @@ def check_keydown_events(event, ship, screen,
             ship.moving = -1
 
         if event.key == pygame.K_SPACE:
-            new_bullet = Bullet(screen, ship, ai_settings)
-            bullets.add(new_bullet)
+            fire_bullets(screen, ship, ai_settings, bullets)
+
+
+def fire_bullets(screen, ship, ai_settings, bullets):
+    if len(bullets) < ai_settings.bullets_alowed:
+        new_bullet = Bullet(screen, ship, ai_settings)
+        bullets.add(new_bullet)
+
 
 def check_keyup_events(event, ship) -> None:
     """Проверяет события связанные с высвобождением кнопки"""
     if event.type == pygame.KEYUP:
-        if (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT): 
+        if (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT):
             ship.moving = 0
-            
+
 
 def update_screen(ai_settings: Settings, screen,
                   ship: Ship, bullets) -> None:
     """Перерисовывает экран"""
     screen.fill(ai_settings.bg_color)
     ship.update(ai_settings)
+    update_bullets(bullets)
+    ship.blitme()
+    #Отображение последнего прорисованого экрана
+    pygame.display.flip()
+
+
+def update_bullets(bullets):
+    """Обновляет позицию пуль и удаляет выходящие за границу"""
     bullets.update()
 
     for bullet in bullets.sprites():
         bullet.draw_bullet()
-
-    ship.blitme()
-    #Отображение последнего прорисованого экрана
-    pygame.display.flip()
+    
+    for bullet in bullets.copy():
+        if bullet.rect.bottom <= 0:
+            bullets.remove(bullet)
