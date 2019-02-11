@@ -5,7 +5,7 @@ from ship import Ship
 import game_functions as gf
 
 def run_game():
-    #Иницилизация игры и создание объекта окна
+    """Иницилизация игры и создание объекта окна"""
     pygame.init()
     ai_settings = Settings()
     screen = pygame.display.set_mode(

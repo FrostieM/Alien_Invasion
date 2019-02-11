@@ -20,11 +20,13 @@ class Ship():
         self.rect.bottom = self.screen_rect.bottom
         self.moving = 0
 
-    def blitme(self):
-        #Рисует корабль в текущей позиции
+
+    def blitme(self) -> None:
+        """Рисует корабль в текущей позиции"""
         self.screen.blit(self.image, self.rect)
     
-    def update(self, ai_settings: Settings):
+    def update(self, ai_settings: Settings) -> None:
+        """Обновляет позицию корабля"""
         self.center += self.moving * ai_settings.ship_speed_factor
         
         if self.center < 0:
