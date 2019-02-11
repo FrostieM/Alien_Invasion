@@ -1,20 +1,17 @@
 import pygame
 from pygame.sprite import Sprite
 
-from settings import Settings
-from ship import Ship
-
 class Bullet(Sprite):
     """Класс для управления пулями"""
 
-    def __init__(self, ai_settings: Settings,
-                 screen, ship: Ship):
+    def __init__(self, screen, ship, ai_settings):
         """Создает объект пули в текущей позиции корабля"""
-        super().__init__()
+        super(Bullet, self).__init__()
         self.screen = screen
 
-        self.rect = pygame.Rect(0, 0, ai_settings.bullet_width,
+        self.rect = pygame.Rect(0, 0, ai_settings.bullet_width, 
                                 ai_settings.bullet_height)
+        
         self.rect.centerx = ship.rect.centerx
         self.rect.top = ship.rect.top
 
