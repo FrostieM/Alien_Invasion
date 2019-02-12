@@ -29,4 +29,17 @@ class Alien(Sprite):
         self.screen.blit(self.image, self.rect)
 
 
+    def update(self):
+        """Перемещает пришельцев вправо"""
+        self.x_pos += (self.ai_settings.alien_speed_factor *
+                       self.ai_settings.fleet_direction)
+        self.rect.x = self.x_pos
 
+
+    def check_edges(self) -> bool:
+        screen_rect = self.screen.get_rect()
+
+        if self.rect.left >= screen_rect.right or self.rect.left <= 0:
+            return True
+
+        return False
