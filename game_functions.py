@@ -1,5 +1,6 @@
-import pygame
 from time import sleep
+
+import pygame
 
 from settings import Settings
 from ship import Ship
@@ -7,18 +8,37 @@ from bullet import Bullet
 from alien import Alien
 
 
-def check_events(ai_settings, screen, ship, bullets) -> bool:
+def check_events(ai_settings, screen, ship, bullets, aliens,
+                 stats, play_button) -> bool:
     """Проверяет события связанные с нажатием кнопок клавиатуры и мыши"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             return True
         
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            check_play_button(ai_settings, screen, stats,
+                              play_button, ship, aliens, 
+                              bullets, mouse_x, mouse_y)
+
         if check_keydown_events(event, ship, screen, ai_settings, bullets):
             return True
 
         check_keyup_events(event, ship)
 
     return False
+
+
+def check_play_button(ai_settings, screen, stats, play_button,
+                      ship, aliens, bullets, mouse_x, mouse_y):
+    """Запускает новую игру при нажатии кнопки Play"""
+    if play_button.rect.collidepoint(mouse_x, mouse_y):
+        stats.game_active = True
+        stats.reset_stats()
+        aliens.empty()
+        bullets.empty()
+        create_fleet(ai_settings, screen, ship, aliens)
+        ship.center_ship()
 
 
 def check_keydown_events(event, ship, screen,
@@ -54,14 +74,21 @@ def check_keyup_events(event, ship) -> None:
 
 
 def update_screen(ai_settings: Settings, screen,
-                  ship: Ship, aliens, bullets, stats) -> None:
+                  ship: Ship, aliens, bullets,
+                  stats, play_button) -> None:
     """Перерисовывает экран"""
     screen.fill(ai_settings.bg_color)
-    ship.update(ai_settings)
-    update_bullets(ai_settings, screen, ship, aliens, bullets)
-    update_aliens(ai_settings, ship, aliens, stats, screen, bullets)
-    ship.blitme()
-    aliens.draw(screen)
+    
+    if stats.game_active:
+        ship.update(ai_settings)
+        update_bullets(ai_settings, screen, ship, aliens, bullets)
+        update_aliens(ai_settings, ship, aliens, stats, screen, bullets)
+        ship.blitme()
+        aliens.draw(screen)
+
+    if not stats.game_active:
+        play_button.draw_button()
+
     #Отображение последнего прорисованого экрана
     pygame.display.flip()
 
@@ -82,11 +109,11 @@ def update_bullets(ai_settings, screen, ship, aliens, bullets) -> None:
 
 def  check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
     if not aliens:
+        sleep(0.5)
         bullets.empty()
         create_fleet(ai_settings, screen, ship, aliens)
-        sleep(0.5)
 
-    pygame.sprite.groupcollide(aliens, bullets, True, False)
+    pygame.sprite.groupcollide(aliens, bullets, True, True)
 
 
 def update_aliens(ai_settings, ship, aliens, stats, screen, bullets):
@@ -95,6 +122,26 @@ def update_aliens(ai_settings, ship, aliens, stats, screen, bullets):
 
     if pygame.sprite.spritecollideany(ship, aliens):
         ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+
+    check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
+
+
+def check_fleet_edges(ai_settings, aliens):
+    """Реагирует на достижение пришельцем края экрана"""
+    for alien in aliens.sprites():
+        if alien.check_edges():
+            change_fleet_direction(ai_settings, aliens)
+            break
+
+
+def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    """Проверяет, добрались ли пришельцы до нижнего края экрана"""
+    screen_rect = screen.get_rect()
+    
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
 
 
 def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
@@ -107,16 +154,11 @@ def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
     create_fleet(ai_settings, screen, ship, aliens)
     ship.center_ship()
 
+    if stats.ship_left < 0:
+        stats.game_active = False
+
     sleep(0.5)
     
-
-def check_fleet_edges(ai_settings, aliens):
-    """Реагирует на достижение пришельцем края экрана"""
-    for alien in aliens.sprites():
-        if alien.check_edges():
-            change_fleet_direction(ai_settings, aliens)
-            break
-
 
 def change_fleet_direction(ai_settings, aliens):
     """Опускает весь флот и меняет направление флота."""
