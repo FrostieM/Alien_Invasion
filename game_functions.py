@@ -3,9 +3,9 @@ from time import sleep
 import pygame
 
 from settings import Settings
-from ship import Ship
+from sprites import Ship
 from bullet import Bullet
-from alien import Alien
+from sprites import Alien
 
 
 def check_events(ai_settings, screen, ship, bullets, aliens,
@@ -91,7 +91,7 @@ def update_screen(ai_settings: Settings, screen,
     scoreboard.show_score()
 
     if stats.game_active:
-        ship.update(ai_settings)
+        ship.update()
         ship.blitme()
 
         update_bullets(ai_settings, stats, screen,
@@ -194,7 +194,7 @@ def change_fleet_direction(ai_settings, aliens):
 
 def create_fleet(ai_settings, screen, ship, aliens) -> None:
     """Создает флот пришельцев"""
-    alien = Alien(ai_settings, screen)
+    alien = Alien(screen, ai_settings)
     number_aliens_x = get_number_aliens_x(ai_settings, alien.rect.width)
     number_rows = get_number_rows(ai_settings, ship.rect.height,
                                   alien.rect.height)
@@ -220,7 +220,7 @@ def get_number_rows(ai_settings, ship_height, alien_height):
 
 
 def create_alien(ai_settings, screen, aliens, alien_number, row_number):
-    alien = Alien(ai_settings, screen)
+    alien = Alien(screen, ai_settings)
     alien_width = alien.rect.width
     alien.x_pos = alien_width + 2 * alien_width * alien_number
     alien.rect.x = alien.x_pos

@@ -2,7 +2,7 @@ import pygame
 from pygame.sprite import Group
 
 from settings import Settings
-from ship import Ship
+from sprites import Ship
 from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
@@ -19,7 +19,7 @@ def run_game():
     pygame.display.set_caption("Alien Invasion")
 
     stats = GameStats(ai_settings)
-    ship = Ship(screen)
+    ship = Ship(screen, ai_settings)
     bullets = Group()
     aliens = Group()
 
