@@ -50,15 +50,16 @@ def check_keydown_events(event, ship, screen, ai_settings,
                          bullets, stats, aliens) -> None:
     """Проверяет события связанные с нажатием на кнопку"""
     if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_SPACE:
+            fire_bullets(screen, ship, ai_settings, bullets)
+
         if event.key == pygame.K_RIGHT:
             ship.moving = 1
             
         if event.key == pygame.K_LEFT:
             ship.moving = -1
 
-        if event.key == pygame.K_SPACE:
-            fire_bullets(screen, ship, ai_settings, bullets)
-
+       
         if event.key == pygame.K_q:
             return True
         
@@ -84,25 +85,31 @@ def check_keyup_events(event, ship) -> None:
 
 def update_screen(ai_settings: Settings, screen,
                   ship: Ship, aliens, bullets,
-                  stats, play_button) -> None:
+                  stats, play_button, scoreboard) -> None:
     """Перерисовывает экран"""
     screen.fill(ai_settings.bg_color)
-    
+    scoreboard.show_score()
+
     if stats.game_active:
         ship.update(ai_settings)
-        update_bullets(ai_settings, screen, ship, aliens, bullets)
-        update_aliens(ai_settings, ship, aliens, stats, screen, bullets)
         ship.blitme()
+
+        update_bullets(ai_settings, stats, screen,
+                       ship, aliens, bullets, scoreboard)
+        update_aliens(ai_settings, ship, aliens, stats, screen, bullets)
+        
         aliens.draw(screen)
 
-    if not stats.game_active:
+    elif not stats.game_active:
         play_button.draw_button()
 
     #Отображение последнего прорисованого экрана
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, screen, ship, aliens, bullets) -> None:
+def update_bullets(ai_settings, stats, screen, 
+                   ship, aliens, bullets,
+                   scoreboard) -> None:
     """Обновляет позицию пуль и удаляет выходящие за границу"""
     bullets.update()
 
@@ -113,17 +120,23 @@ def update_bullets(ai_settings, screen, ship, aliens, bullets) -> None:
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
 
-    check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets)
+    check_bullet_alien_collisions(ai_settings, stats, screen,
+                                  ship, aliens, bullets, scoreboard)
 
 
-def  check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
+def  check_bullet_alien_collisions(ai_settings, stats, screen,
+                                   ship, aliens, bullets,
+                                   scoreboard):
     if not aliens:
         sleep(0.5)
         bullets.empty()
         create_fleet(ai_settings, screen, ship, aliens)
         ai_settings.increase_speed()
 
-    pygame.sprite.groupcollide(aliens, bullets, True, True)
+    collisions = pygame.sprite.groupcollide(aliens, bullets, True, True)
+    if collisions:
+        stats.score += ai_settings.alien_points * len(collisions)
+        scoreboard.prep_score()
 
 
 def update_aliens(ai_settings, ship, aliens, stats, screen, bullets):
@@ -186,7 +199,7 @@ def create_fleet(ai_settings, screen, ship, aliens) -> None:
     number_rows = get_number_rows(ai_settings, ship.rect.height,
                                   alien.rect.height)
     #Создание первого ряда пришельцев
-    for row_number in range(number_rows):
+    for row_number in range(number_rows - 1):
         for alien_number in range(number_aliens_x):
             create_alien(ai_settings, screen, aliens, alien_number, row_number)
 
