@@ -1,6 +1,6 @@
 class Settings():
     #Класс для хранения всех настроек игры
-
+    # pylint: disable=too-many-instance-attributes
     def __init__(self):
         #Настройки экрана
         self.screen_width = 1200
